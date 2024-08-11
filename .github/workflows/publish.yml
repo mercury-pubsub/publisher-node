@@ -1,9 +1,8 @@
 name: Publish
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 env:
   BASE_URL: https://na.mercury-pubsub.dev
@@ -29,19 +28,11 @@ jobs:
           node-version: 20
           cache: pnpm
       - name: Check version
-        run: '[[ $(cat package.json | jq -r .version) == $GITHUB_REF_NAME ]]'
+        run: '[[ "v$(cat package.json | jq -r .version)" == "$GITHUB_REF_NAME" ]]'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm run build && cp package.json dist
-      - name: Create release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: Release ${{ github.ref }}
       - name: Publish
         run: pnpm publish dist --access public --dry-run
         env:
