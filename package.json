@@ -1,0 +1,43 @@
+{
+	"name": "@mercury-pubsub/publisher",
+	"version": "2.0.0",
+	"description": "",
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"default": "./dist/index.mjs",
+				"types": "./dist/index.d.mts"
+			},
+			"require": {
+				"default": "./dist/index.js",
+				"types": "./dist/index.d.ts"
+			}
+		}
+	},
+	"scripts": {
+		"update-dependencies": "sh scripts/update-dependencies.sh",
+		"format": "biome format --write .",
+		"lint": "biome ci --error-on-warnings .",
+		"check-types": "tsc",
+		"check-dead-code": "knip",
+		"quality": "pnpm run lint && pnpm run check-types && pnpm run check-dead-code && pnpm run build",
+		"build": "tsup"
+	},
+	"dependencies": {
+		"tslib": "2.6.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.8.3",
+		"@total-typescript/ts-reset": "0.5.1",
+		"@types/node": "18.19.44",
+		"knip": "5.27.2",
+		"npm-check-updates": "17.0.6",
+		"tsup": "8.2.4",
+		"typescript": "5.5.4"
+	}
+}
