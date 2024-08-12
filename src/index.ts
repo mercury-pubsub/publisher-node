@@ -1,3 +1,5 @@
+import type { Channels } from "@mercury-pubsub/types";
+
 /**
  * @public
  */
@@ -25,7 +27,10 @@ export class Publisher {
 	/**
 	 * @throws {PublisherError}
 	 */
-	async publish(channelId: string, body: unknown): Promise<void> {
+	async publish<ChannelId extends keyof Channels>(
+		channelId: ChannelId,
+		body: Channels[ChannelId],
+	): Promise<void> {
 		const response = await fetch(new URL(channelId, Publisher.#baseUrl), {
 			method: "POST",
 			body: JSON.stringify(body),
@@ -43,7 +48,7 @@ export class Publisher {
 	/**
 	 * @throws {PublisherError}
 	 */
-	async getAccessToken(action: "pub" | "sub", channelId: string): Promise<string> {
+	async getAccessToken(action: "pub" | "sub", channelId: keyof Channels): Promise<string> {
 		const response = await fetch(
 			new URL(`access-token/${action}/${channelId}`, Publisher.#baseUrl),
 			{
