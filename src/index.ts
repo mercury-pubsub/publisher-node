@@ -15,31 +15,44 @@ export class PublisherError extends Error {
 /**
  * @public
  */
+export type PublisherOptions = {
+	apiKeyId: string;
+	apiKeySecret: string;
+};
+
+/**
+ * @public
+ */
 export class Publisher {
 	static #baseUrl = process.env.BASE_URL;
 
+	#projectId: string;
 	#apiKey: string;
 
-	constructor(clientId: string, clientSecret: string) {
-		this.#apiKey = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+	constructor(projectId: string, options: PublisherOptions) {
+		this.#projectId = projectId;
+		this.#apiKey = Buffer.from(`${options.apiKeyId}:${options.apiKeySecret}`).toString("base64");
 	}
 
 	/**
 	 * @throws {PublisherError}
 	 */
-	async publish<ChannelId extends keyof Channels>(
-		channelId: ChannelId,
-		body: Channels[ChannelId],
+	async publish<ChannelName extends keyof Channels>(
+		channelName: ChannelName,
+		body: Channels[ChannelName],
 	): Promise<void> {
-		const response = await fetch(new URL(channelId, Publisher.#baseUrl), {
-			method: "POST",
-			body: JSON.stringify(body),
-			headers: {
-				"Content-Type": "application/json",
-				// biome-ignore lint/style/useNamingConvention: standard header name
-				Authorization: `Basic ${this.#apiKey}`,
+		const response = await fetch(
+			new URL(`${this.#projectId}/${encodeURIComponent(channelName)}`, Publisher.#baseUrl),
+			{
+				method: "POST",
+				body: JSON.stringify(body),
+				headers: {
+					"Content-Type": "application/json",
+					// biome-ignore lint/style/useNamingConvention: standard header name
+					Authorization: `Basic ${this.#apiKey}`,
+				},
 			},
-		});
+		);
 		if (!response.ok) {
 			throw new PublisherError(response.status, await response.text());
 		}
@@ -48,9 +61,12 @@ export class Publisher {
 	/**
 	 * @throws {PublisherError}
 	 */
-	async getAccessToken(action: "pub" | "sub", channelId: keyof Channels): Promise<string> {
+	async getAccessToken(action: "pub" | "sub", channelName: keyof Channels): Promise<string> {
 		const response = await fetch(
-			new URL(`access-token/${action}/${channelId}`, Publisher.#baseUrl),
+			new URL(
+				`access-token/${this.#projectId}/${action}/${encodeURIComponent(channelName)}`,
+				Publisher.#baseUrl,
+			),
 			{
 				headers: {
 					// biome-ignore lint/style/useNamingConvention: standard header name
