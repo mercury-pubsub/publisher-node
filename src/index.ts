@@ -15,23 +15,18 @@ export class PublisherError extends Error {
 /**
  * @public
  */
-export type PublisherOptions = {
-	apiKeyId: string;
-	apiKeySecret: string;
-};
-
-/**
- * @public
- */
 export class Publisher {
 	static #baseUrl = process.env.BASE_URL;
 
 	#projectId: string;
 	#apiKey: string;
 
-	constructor(projectId: string, options: PublisherOptions) {
+	constructor(projectId: string, apiKey: string) {
 		this.#projectId = projectId;
-		this.#apiKey = Buffer.from(`${options.apiKeyId}:${options.apiKeySecret}`).toString("base64");
+		this.#apiKey = apiKey;
+
+		this.publish = this.publish.bind(this);
+		this.getAccessToken = this.getAccessToken.bind(this);
 	}
 
 	/**
