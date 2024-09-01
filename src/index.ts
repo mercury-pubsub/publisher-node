@@ -16,12 +16,17 @@ export class PublisherError extends Error {
  * @public
  */
 export class Publisher {
-	static #baseUrl = process.env.BASE_URL;
-
+	#baseUrl: string;
 	#projectId: string;
 	#apiKey: string;
 
-	constructor(projectId: string, apiKey: string) {
+	constructor(
+		region: "southeast-asia" | "eu-west" | "us-east" | "us-west",
+		projectId: string,
+		apiKey: string,
+	) {
+		// biome-ignore lint/style/noNonNullAssertion: guaranteed by @t3-oss/env-core
+		this.#baseUrl = process.env.BASE_URL!.replace("{{REGION}}", region);
 		this.#projectId = projectId;
 		this.#apiKey = apiKey;
 
@@ -37,7 +42,7 @@ export class Publisher {
 		body: Channels[ChannelName],
 	): Promise<void> {
 		const response = await fetch(
-			new URL(`${this.#projectId}/${encodeURIComponent(channelName)}`, Publisher.#baseUrl),
+			new URL(`${this.#projectId}/${encodeURIComponent(channelName)}`, this.#baseUrl),
 			{
 				method: "POST",
 				body: JSON.stringify(body),
@@ -60,7 +65,7 @@ export class Publisher {
 		const response = await fetch(
 			new URL(
 				`access-token/${this.#projectId}/${action}/${encodeURIComponent(channelName)}`,
-				Publisher.#baseUrl,
+				this.#baseUrl,
 			),
 			{
 				headers: {
