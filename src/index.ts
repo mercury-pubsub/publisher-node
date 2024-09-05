@@ -31,7 +31,7 @@ export class Publisher {
 		this.#apiKey = apiKey;
 
 		this.publish = this.publish.bind(this);
-		this.getAccessToken = this.getAccessToken.bind(this);
+		this.createAccessToken = this.createAccessToken.bind(this);
 	}
 
 	/**
@@ -61,13 +61,14 @@ export class Publisher {
 	/**
 	 * @throws {PublisherError}
 	 */
-	async getAccessToken(action: "pub" | "sub", channelName: keyof Channels): Promise<string> {
+	async createAccessToken(action: "pub" | "sub", channelName: keyof Channels): Promise<string> {
 		const response = await fetch(
 			new URL(
 				`access-token/${this.#projectId}/${action}/${encodeURIComponent(channelName)}`,
 				this.#baseUrl,
 			),
 			{
+				method: "POST",
 				headers: {
 					// biome-ignore lint/style/useNamingConvention: standard header name
 					Authorization: `Basic ${this.#apiKey}`,
